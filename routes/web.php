@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FormatController;
+use App\Http\Controllers\ImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', function() {
+
+    //get results from airtable
+    $meetings = ImportController::table('Meetings');
+
+    //dd(array_pop($meetings));
+
+
+    //format them in the right format
+    $meetings = FormatController::convert($meetings);
+
+    //prepare data
+    $data = json_encode($meetings);
+
+    //save file
+    file_put_contents(public_path() . '/meetings.json', $data);
+
+    //output
+    return '<a href="/meetings.json">saved ' . count($meetings) . ' meetings</a>';
 });
