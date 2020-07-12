@@ -10,47 +10,107 @@ class FormatController extends Controller
     static function convert($rows) {
         $meetings = $errors = [];
 
-        //temporary lookup for days
+        //lookups
         $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        $categories = ['Accessibility', 'Open / Closed', 'Format', 'Status', 'Focus'];
+        $formats = [
+            'American Sign Language' => 'ASL',
+            'Beginner' => 'BE',
+            'Big Book' => 'B',
+            'Book Study' => 'LIT',
+            'Chip Meeting' => 'H',
+            'Chips Monthly' => 'H',
+            'Chips Weekly' => 'H',
+            'Childcare' => 'BA',
+            'Closed' => 'C',
+            'Discussion' => 'D',
+            'Espanol (Spanish Language)' => 'S',
+            'Gay' => 'G',
+            'Lesbian' => 'L',
+            'Location Temporarily Closed' => 'TC',
+            'Meditation' => 'MED',
+            'Men' => 'M',
+            'Open' => 'O',
+            'Secular' => 'A',
+            'Seniors' => 'SEN',
+            'Speaker' => 'SP',
+            'Speaker Discussion' => 'D',
+            'Step Study' => 'ST',
+            'Steps & Traditions' => 'ST',
+            'Traditions Study' => 'TR',
+            'Transgender' => 'T', 
+            'Wheelchair Accessible' => 'X',
+            'Women' => 'W',
+            'Young People' => 'YP',
+        ];
 
         foreach ($rows as $row) {
 
-            //some rows are empty, here's a simple hack
+            //must have a name, day, and time
+            if (empty($row->fields->{'Meeting Name'}) || 
+                empty($row->fields->{'Day'}) || 
+                empty($row->fields->{'Start Time'})) {
+                continue;
+            }
+
+            //day must be valid
             if (!in_array($row->fields->{'Day'}, $days)) {
                 $errors[] = [
                     'meeting' => $row->fields->{'Meeting Name'},
-                    'issue' => 'invalid day ' + $row->fields->{'Day'},
+                    'issue' => 'unknown day ' . $row->fields->{'Day'},
                 ];
                 continue;
             }
 
             //types
             $types = [];
-            if ($row->fields->{'Open / Closed'} == 'Open') $types[] = 'O';
-            if ($row->fields->{'Open / Closed'} == 'Closed') $types[] = 'C';
-            if ($row->fields->{'Accessibility'} == 'Wheelchair Accessible') $types[] = 'X';
-            if (in_array('Discussion', $row->fields->{'Format'})) $types[] = 'D';
-            if (in_array('Speaker', $row->fields->{'Format'})) $types[] = 'S';
-            if ($row->fields->{'Status'}[0] == 'Location Temporarily Closed') $types[] = 'TC';
+            foreach ($categories as $category) {
+                if (!empty($row->fields->{$category})) {
+                    if (!is_array($row->fields->{$category})) $row->fields->{$category} = [$row->fields->{$category}];
+                    foreach ($row->fields->{$category} as $format) {
+                        if (!array_key_exists($format, $formats)) {
+                            $errors[] = [
+                                'meeting' => $row->fields->{'Meeting Name'},
+                                'issue' => 'unknown ' . strtolower($category) . ' ' . $format,
+                            ];
+                            continue;
+                        }
+                        $types[] = $formats[$format];
+                    }
+                }
+            }
+
+            //region
+            $region = null;
+            if (!empty($row->fields->{'City'}[0])) {
+                $region = ($row->fields->{'City'}[0] == 'San Francisco') ?: 'Marin';
+            }
 
             $meetings[] = [
                 'slug' => $row->id,
                 'name' => $row->fields->{'Meeting Name'},
-                'time' => date('H:i', strtotime(@$row->fields->{'Start Time'})),
+                'time' => date('H:i', strtotime($row->fields->{'Start Time'})),
                 'day' => array_search($row->fields->{'Day'}, $days),
-                //'notes' => @$row->fields->{'Meeting Note'},
+                'types' => array_unique($types),
+                'conference_url' => @$row->fields->{'Remote meeting URL'},
+                'conference_phone' => @$row->fields->{'Phone'},
+                'square' => @$row->fields->{'Square'},
+                'venmo' => @$row->fields->{'Venmo'},
+                'paypal' => @$row->fields->{'PayPal'},
+                'notes' => @$row->fields->{'Meeting Note'},
                 'location' => @$row->fields->{'Location Name'}[0],
                 'address' => @$row->fields->{'Street Address'}[0],
                 'city' => @$row->fields->{'City'}[0],
                 'postal_code' => @$row->fields->{'ZIP'}[0],
-                'region' => @$row->fields->{'City'}[0] == 'San Francisco' ? 'San Francisco' : 'Marin',
+                'region' => $region,
                 'sub_region' => @$row->fields->{'Neighborhood'}[0],
                 'location_notes' => @$row->fields->{'Locations_Note'}[0],
-                'types' => array_map(function($type) { return strtoupper(trim($type, ' \t\n\r\0\x0B\xc2\xa0')); }, $row->fields->{'Designations'}),
             ];
         }
 
-        //dd($errors);
+        if (!empty($_GET['display']) && $_GET['display'] == 'errors') {
+            dd($errors);
+        }
 
         return $meetings;
     }
