@@ -83,7 +83,7 @@ class FormatController extends Controller
             //region
             $region = null;
             if (!empty($row->fields->{'City'}[0])) {
-                $region = ($row->fields->{'City'}[0] == 'San Francisco') ?: 'Marin';
+                $region = ($row->fields->{'City'}[0] == 'San Francisco') ? 'San Francisco' : 'Marin';
             }
 
             $meetings[] = [
