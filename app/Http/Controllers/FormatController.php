@@ -51,7 +51,7 @@ class FormatController extends Controller
 
         foreach ($rows as $row) {
 
-            //must each of these fields
+            //must have each of these fields
             foreach ($required_fields as $field) {
                 if (empty($row->fields->{$field})) {
                     $errors[] = [
@@ -106,6 +106,13 @@ class FormatController extends Controller
                         $types[] = $values[$value];
                     }
                 }
+            }
+
+            //hide meetings that are temporarily closed and not online
+            if (in_array('TC', $types) && 
+                empty($row->fields->{'Remote meeting URL'}) &&
+                empty($row->fields->{'Phone'})) {
+                continue;
             }
 
             //region
