@@ -139,7 +139,7 @@ class FormatController extends Controller
                 'postal_code' => @$row->fields->{'ZIP'}[0],
                 'region' => $region,
                 'sub_region' => @$row->fields->{'Neighborhood'}[0],
-                'location_notes' => @$row->fields->{'Locations_Note'}[0],
+                'location_notes' => @$row->fields->{'Location Note'}[0],
             ];
         }
 
