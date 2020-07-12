@@ -7,13 +7,18 @@ use Illuminate\Http\Request;
 class FormatController extends Controller
 {
     //convert airtable format to meeting guide format
-    static function convert($rows) {
+    static function convert($rows, $return_errors=false) {
         $meetings = $errors = [];
 
-        //lookups
-        $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        $required_fields = ['Meeting Name', 'Day', 'Start Time'];
+
+        $location_fields = ['Street Address', 'City', 'ZIP'];
+
         $categories = ['Accessibility', 'Open / Closed', 'Format', 'Status', 'Focus'];
-        $formats = [
+
+        $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+        $values = [
             'American Sign Language' => 'ASL',
             'Beginner' => 'BE',
             'Big Book' => 'B',
@@ -46,18 +51,39 @@ class FormatController extends Controller
 
         foreach ($rows as $row) {
 
-            //must have a name, day, and time
-            if (empty($row->fields->{'Meeting Name'}) || 
-                empty($row->fields->{'Day'}) || 
-                empty($row->fields->{'Start Time'})) {
+            //must each of these fields
+            foreach ($required_fields as $field) {
+                if (empty($row->fields->{$field})) {
+                    $errors[] = [
+                        'id' => $row->id,
+                        'name' => @$row->fields->{'Meeting Name'},
+                        'issue' => 'empty ' . $field . ' field',
+                    ];
+                    continue 2;    
+                }
+            }
+
+            //must have one of these fields
+            $location = false;
+            foreach ($location_fields as $field) {
+                if (!empty($row->fields->{$field})) $location = true;
+            }
+            if (!$location) {
+                $errors[] = [
+                    'id' => $row->id,
+                    'name' => $row->fields->{'Meeting Name'},
+                    'issue' => 'no location information',
+                ];
                 continue;
             }
 
             //day must be valid
             if (!in_array($row->fields->{'Day'}, $days)) {
                 $errors[] = [
-                    'meeting' => $row->fields->{'Meeting Name'},
-                    'issue' => 'unknown day ' . $row->fields->{'Day'},
+                    'id' => $row->id,
+                    'name' => $row->fields->{'Meeting Name'},
+                    'issue' => 'unexpected day',
+                    'value' => $row->fields->{'Day'},
                 ];
                 continue;
             }
@@ -67,15 +93,17 @@ class FormatController extends Controller
             foreach ($categories as $category) {
                 if (!empty($row->fields->{$category})) {
                     if (!is_array($row->fields->{$category})) $row->fields->{$category} = [$row->fields->{$category}];
-                    foreach ($row->fields->{$category} as $format) {
-                        if (!array_key_exists($format, $formats)) {
+                    foreach ($row->fields->{$category} as $value) {
+                        if (!array_key_exists($value, $values)) {
                             $errors[] = [
-                                'meeting' => $row->fields->{'Meeting Name'},
-                                'issue' => 'unknown ' . strtolower($category) . ' ' . $format,
+                                'id' => $row->id,
+                                'name' => $row->fields->{'Meeting Name'},
+                                'issue' => 'unexpected ' . $category,
+                                'value' => $value,
                             ];
                             continue;
                         }
-                        $types[] = $formats[$format];
+                        $types[] = $values[$value];
                     }
                 }
             }
@@ -108,10 +136,6 @@ class FormatController extends Controller
             ];
         }
 
-        if (!empty($_GET['display']) && $_GET['display'] == 'errors') {
-            dd($errors);
-        }
-
-        return $meetings;
+        return $return_errors ? $errors : $meetings;
     }
 }

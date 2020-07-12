@@ -26,3 +26,15 @@ Route::get('/', function() {
     //prepare data
     return response()->json($meetings);
 });
+
+Route::get('errors', function() {
+
+    //get results from airtable
+    $meetings = ImportController::table('Meetings', 'Josh\'s View');
+
+    //format them in the right format
+    $errors = FormatController::convert($meetings, true);
+
+    //prepare data
+    return view('errors', compact('errors'));
+});
