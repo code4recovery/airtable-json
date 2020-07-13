@@ -16,40 +16,18 @@ class FormatController extends Controller
 
         $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-        $values = [
-            'American Sign Language' => 'ASL',
-            'As Bill Sees It' => 'ABSI',
+        //standard TSML types are defined in Controller.php
+        $values = array_merge(self::$tsml_types, [
             'Beginner' => 'BE',
-            'Big Book' => 'B',
             'Book Study' => 'LIT',
             'Chip Meeting' => 'H',
             'Chips Monthly' => 'H',
             'Chips Weekly' => 'H',
             'Childcare' => 'BA',
-            'Closed' => 'C',
-            'Daily Reflections' => 'DR',
-            'Discussion' => 'D',
-            'English' => 'EN',
-            'Gay' => 'G',
-            'Lesbian' => 'L',
-            'LGBTQ' => 'LGBTQ',
-            'Literature' => 'LIT',
-            'Location Temporarily Closed' => 'TC',
-            'Meditation' => 'MED',
-            'Men' => 'M',
-            'Open' => 'O',
-            'Secular' => 'A',
-            'Seniors' => 'SEN',
-            'Spanish' => 'S',
-            'Speaker' => 'SP',
             'Speaker Discussion' => 'D',
             'Step Study' => 'ST',
             'Traditions Study' => 'TR',
-            'Transgender' => 'T', 
-            'Wheelchair Access' => 'X',
-            'Women' => 'W',
-            'Young People' => 'YP',
-        ];
+        ]);
 
         foreach ($rows as $row) {
 
@@ -109,7 +87,7 @@ class FormatController extends Controller
             //hide meetings that are temporarily closed and not online
             if (in_array('TC', $types) && 
                 empty($row->fields->{'Remote meeting URL'}) &&
-                empty($row->fields->{'Phone'})) {
+                empty($row->fields->{'TSML_Phone_Final'})) {
                 continue;
             }
 
@@ -126,8 +104,8 @@ class FormatController extends Controller
                 'day' => array_search($row->fields->{'Day'}, $days),
                 'types' => array_unique($types),
                 'conference_url' => @$row->fields->{'Remote meeting URL'},
-                'conference_phone' => @$row->fields->{'Phone'},
-                'square' => @$row->fields->{'Square'},
+                'conference_phone' => @$row->fields->{'TSML_Phone_Final'},
+                'square' => @$row->fields->{'Cash App'},
                 'venmo' => @$row->fields->{'Venmo'},
                 'paypal' => @$row->fields->{'PayPal'},
                 'notes' => @$row->fields->{'Meeting Note'},
