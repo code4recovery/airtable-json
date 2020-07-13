@@ -14,12 +14,11 @@ class FormatController extends Controller
 
         $location_fields = ['Street Address', 'City', 'ZIP'];
 
-        $categories = ['Accessibility', 'Open / Closed', 'Format', 'Status', 'Focus'];
-
         $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
         $values = [
             'American Sign Language' => 'ASL',
+            'As Bill Sees It' => 'ABSI',
             'Beginner' => 'BE',
             'Big Book' => 'B',
             'Book Study' => 'LIT',
@@ -29,8 +28,7 @@ class FormatController extends Controller
             'Childcare' => 'BA',
             'Closed' => 'C',
             'Discussion' => 'D',
-            'English-speaking' => 'EN',
-            'en Español' => 'S',
+            'English' => 'EN',
             'Gay' => 'G',
             'Lesbian' => 'L',
             'Location Temporarily Closed' => 'TC',
@@ -39,12 +37,13 @@ class FormatController extends Controller
             'Open' => 'O',
             'Secular' => 'A',
             'Seniors' => 'SEN',
+            'Spanish' => 'S',
             'Speaker' => 'SP',
             'Speaker Discussion' => 'D',
             'Step Study' => 'ST',
             'Traditions Study' => 'TR',
             'Transgender' => 'T', 
-            'Wheelchair Accessible' => 'X',
+            'Wheelchair Access' => 'X',
             'Women' => 'W',
             'Young People' => 'YP',
         ];
@@ -90,22 +89,18 @@ class FormatController extends Controller
 
             //types
             $types = [];
-            foreach ($categories as $category) {
-                if (!empty($row->fields->{$category})) {
-                    if (!is_array($row->fields->{$category})) $row->fields->{$category} = [$row->fields->{$category}];
-                    foreach ($row->fields->{$category} as $value) {
-                        if (!array_key_exists($value, $values)) {
-                            $errors[] = [
-                                'id' => $row->id,
-                                'name' => $row->fields->{'Meeting Name'},
-                                'issue' => 'unexpected ' . $category,
-                                'value' => $value,
-                            ];
-                            continue;
-                        }
-                        $types[] = $values[$value];
-                    }
+            $row->fields->{'TSML_Type_Final'} = explode(',', $row->fields->{'TSML_Type_Final'});
+            foreach ($row->fields->{'TSML_Type_Final'} as $value) {
+                if (!array_key_exists($value, $values)) {
+                    $errors[] = [
+                        'id' => $row->id,
+                        'name' => $row->fields->{'Meeting Name'},
+                        'issue' => 'unexpected type',
+                        'value' => $value,
+                    ];
+                    continue;
                 }
+                $types[] = $values[$value];
             }
 
             //hide meetings that are temporarily closed and not online
