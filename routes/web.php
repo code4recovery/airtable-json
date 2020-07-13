@@ -18,7 +18,7 @@ use App\Http\Controllers\ImportController;
 Route::get('/', function() {
 
     //get results from airtable
-    $meetings = ImportController::table('Meetings', 'Josh\'s View');
+    $meetings = ImportController::table('Meetings', 'TSML Meetings');
 
     //format them in the right format
     $meetings = FormatController::convert($meetings);
@@ -30,7 +30,7 @@ Route::get('/', function() {
 Route::get('errors', function() {
 
     //get results from airtable
-    $meetings = ImportController::table('Meetings', 'Josh\'s View');
+    $meetings = ImportController::table('Meetings', 'TSML Meetings');
 
     //format them in the right format
     $errors = FormatController::convert($meetings, true);
