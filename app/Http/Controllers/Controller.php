@@ -11,6 +11,19 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
+    static $tsml_conference_providers = [
+        'bluejeans.com' => 'Bluejeans',
+        'freeconference.com' => 'Free Conference',
+        'freeconferencecall.com' => 'FreeConferenceCall',
+        'meet.google.com' => 'Google Hangouts',
+        'gotomeet.me' => 'GoToMeeting',
+        'gotomeeting.com' => 'GoToMeeting',
+        'skype.com' => 'Skype',
+        'webex.com' => 'WebEx',
+        'zoho.com' => 'Zoho',
+        'zoom.us' => 'Zoom',    
+    ];
+    
     static $tsml_types = [
         '11th Step Meditation' => '11',
         '12 Steps & 12 Traditions' => '12x12',

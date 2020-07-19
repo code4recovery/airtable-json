@@ -8,7 +8,7 @@ class FormatController extends Controller
 {
     //convert airtable format to meeting guide format
     static function convert($rows, $return_errors=false) {
-        $meetings = $errors = [];
+        $meetings = $errors = $new_conference_providers = [];
 
         $required_fields = ['Meeting Name', 'Day', 'Start Time'];
 
@@ -97,6 +97,23 @@ class FormatController extends Controller
                 $region = ($row->fields->{'City'}[0] == 'San Francisco') ? 'San Francisco' : 'Marin';
             }
 
+            //conference url
+            if (!empty($row->fields->{'Remote meeting URL'})) {
+                $url = parse_url($row->fields->{'Remote meeting URL'});
+                $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
+                    return stripos($url['host'], $domain) !== false;
+                });
+                if (!count($matches)) {
+                    $new_conference_providers[] = $url['host'];
+                    $errors[] = [
+                        'id' => $row->id,
+                        'name' => $row->fields->{'Meeting Name'},
+                        'issue' => 'unexpected conference provider',
+                        'value' => $url['host'],
+                    ];    
+                }
+            }
+
             $meetings[] = [
                 'slug' => $row->id,
                 'name' => $row->fields->{'Meeting Name'},
@@ -119,6 +136,17 @@ class FormatController extends Controller
                 'timezone' => 'America/Los_Angeles',
             ];
         }
+
+        /*
+        $new_conference_providers = array_map('strtolower', array_map(function($domain) {
+            if (substr($domain, 0, 4) == 'www.') {
+                $domain = substr($domain, 4);
+            }
+            return $domain;
+        }, $new_conference_providers));
+        sort($new_conference_providers);
+        dd(array_unique($new_conference_providers));
+        */
 
         return $return_errors ? $errors : $meetings;
     }
