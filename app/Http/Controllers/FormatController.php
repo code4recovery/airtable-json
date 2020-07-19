@@ -116,6 +116,7 @@ class FormatController extends Controller
                 'region' => $region,
                 'sub_region' => @$row->fields->{'Neighborhood'}[0],
                 'location_notes' => @$row->fields->{'Location Note'}[0],
+                'timezone' => 'America/Los_Angeles',
             ];
         }
 
