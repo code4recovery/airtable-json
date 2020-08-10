@@ -31,6 +31,13 @@ class FormatController extends Controller
 
         foreach ($rows as $row) {
 
+            //trim all fields
+            foreach ($row->fields as $key => $value) {
+                if (is_string($value)) {
+                    $row->fields->{$key} = trim($value);
+                }
+            }
+
             //must have each of these fields
             foreach ($required_fields as $field) {
                 if (empty($row->fields->{$field})) {
@@ -99,18 +106,28 @@ class FormatController extends Controller
 
             //conference url
             if (!empty($row->fields->{'Remote meeting URL'})) {
+
                 $url = parse_url($row->fields->{'Remote meeting URL'});
-                $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
-                    return stripos($url['host'], $domain) !== false;
-                });
-                if (!count($matches)) {
-                    $new_conference_providers[] = $url['host'];
+                if (empty($url['host'])) {
                     $errors[] = [
                         'id' => $row->id,
                         'name' => $row->fields->{'Meeting Name'},
-                        'issue' => 'unexpected conference provider',
-                        'value' => $url['host'],
-                    ];    
+                        'issue' => 'could not parse url',
+                        'value' => $row->fields->{'Remote meeting URL'},
+                    ];
+                } else {
+                    $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
+                        return stripos($url['host'], $domain) !== false;
+                    });
+                    if (!count($matches)) {
+                        $new_conference_providers[] = $url['host'];
+                        $errors[] = [
+                            'id' => $row->id,
+                            'name' => $row->fields->{'Meeting Name'},
+                            'issue' => 'unexpected conference provider',
+                            'value' => $url['host'],
+                        ];    
+                    }
                 }
             }
 
