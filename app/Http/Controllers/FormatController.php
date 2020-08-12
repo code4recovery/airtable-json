@@ -93,7 +93,7 @@ class FormatController extends Controller
 
             //hide meetings that are temporarily closed and not online
             if (in_array('TC', $types) && 
-                empty($row->fields->{'Remote meeting URL'}) &&
+                empty($row->fields->{'TSML_Remote_Meeting_URL'}) &&
                 empty($row->fields->{'TSML_Phone_Final'})) {
                 continue;
             }
@@ -105,15 +105,15 @@ class FormatController extends Controller
             }
 
             //conference url
-            if (!empty($row->fields->{'Remote meeting URL'})) {
+            if (!empty($row->fields->{'TSML_Remote_Meeting_URL'})) {
 
-                $url = parse_url($row->fields->{'Remote meeting URL'});
+                $url = parse_url($row->fields->{'TSML_Remote_Meeting_URL'});
                 if (empty($url['host'])) {
                     $errors[] = [
                         'id' => $row->id,
                         'name' => $row->fields->{'Meeting Name'},
                         'issue' => 'could not parse url',
-                        'value' => $row->fields->{'Remote meeting URL'},
+                        'value' => $row->fields->{'TSML_Remote_Meeting_URL'},
                     ];
                 } else {
                     $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
@@ -137,13 +137,13 @@ class FormatController extends Controller
                 'time' => date('H:i', strtotime($row->fields->{'Start Time'})),
                 'day' => array_search($row->fields->{'Day'}, $days),
                 'types' => array_unique($types),
-                'conference_url' => @$row->fields->{'Remote meeting URL'},
+                'conference_url' => @$row->fields->{'TSML_Remote_Meeting_URL'},
                 'conference_phone' => @$row->fields->{'TSML_Phone_Final'},
                 'square' => @$row->fields->{'Cash App'},
                 'venmo' => @$row->fields->{'Venmo'},
                 'paypal' => @$row->fields->{'PayPal'},
                 'notes' => @$row->fields->{'Meeting Note'},
-                'location' => @$row->fields->{'Location Name'}[0],
+                'location' => @$row->fields->{'TSML_Location_Name_Final'},
                 'address' => @$row->fields->{'Street Address'}[0],
                 'city' => @$row->fields->{'City'}[0],
                 'postal_code' => @$row->fields->{'ZIP'}[0],
