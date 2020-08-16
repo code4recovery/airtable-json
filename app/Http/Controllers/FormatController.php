@@ -31,6 +31,8 @@ class FormatController extends Controller
 
         foreach ($rows as $row) {
 
+            //dd($row->fields);
+
             //trim all fields
             foreach ($row->fields as $key => $value) {
                 if (is_string($value)) {
@@ -98,12 +100,6 @@ class FormatController extends Controller
                 continue;
             }
 
-            //region
-            $region = null;
-            if (!empty($row->fields->{'City'}[0])) {
-                $region = ($row->fields->{'City'}[0] == 'San Francisco') ? 'San Francisco' : 'Marin';
-            }
-
             //conference url
             if (!empty($row->fields->{'TSML_Remote_Meeting_URL'})) {
 
@@ -147,8 +143,8 @@ class FormatController extends Controller
                 'address' => @$row->fields->{'Street Address'}[0],
                 'city' => @$row->fields->{'City'}[0],
                 'postal_code' => @$row->fields->{'ZIP'}[0],
-                'region' => $region,
-                'sub_region' => @$row->fields->{'Neighborhood'}[0],
+                'region' => @$row->fields->{'TSML_Region'},
+                'sub_region' => @$row->fields->{'TSML_Sub_Region'}[0],
                 'location_notes' => @$row->fields->{'Location Note'}[0],
                 'timezone' => 'America/Los_Angeles',
             ];
