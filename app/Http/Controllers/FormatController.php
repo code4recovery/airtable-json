@@ -141,7 +141,7 @@ class FormatController extends Controller
                 'venmo' => @$row->fields->{'Venmo'},
                 'paypal' => @$row->fields->{'PayPal'},
                 'notes' => @$row->fields->{'Meeting Note'},
-                'location' => @$row->fields->{'TSML_Location_Name_Final'},
+                'location' => @$row->fields->{'TSML_Location_Name_Final'}[0],
                 'address' => @$row->fields->{'Street Address'}[0],
                 'city' => @$row->fields->{'City'}[0],
                 'postal_code' => @$row->fields->{'ZIP'}[0],
