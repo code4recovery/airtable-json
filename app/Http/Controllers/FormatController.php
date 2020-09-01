@@ -33,19 +33,12 @@ class FormatController extends Controller
 
             //dd($row->fields);
 
-            //trim all fields
-            foreach ($row->fields as $key => $value) {
-                if (is_string($value)) {
-                    $row->fields->{$key} = trim($value);
-                }
-            }
-
             //must have each of these fields
             foreach ($required_fields as $field) {
-                if (empty($row->fields->{$field})) {
+                if (empty(self::getValue($row, $field))) {
                     $errors[] = [
                         'id' => $row->id,
-                        'name' => @$row->fields->{'Meeting Name'},
+                        'name' => self::getValue($row, 'Meeting Name'),
                         'issue' => 'empty ' . $field . ' field',
                     ];
                     continue 2;    
@@ -55,24 +48,24 @@ class FormatController extends Controller
             //must have one of these fields
             $location = false;
             foreach ($location_fields as $field) {
-                if (!empty($row->fields->{$field})) $location = true;
+                if (!empty(self::getValue($row, $field))) $location = true;
             }
             if (!$location) {
                 $errors[] = [
                     'id' => $row->id,
-                    'name' => $row->fields->{'Meeting Name'},
+                    'name' => self::getValue($row, 'Meeting Name'),
                     'issue' => 'no location information',
                 ];
                 continue;
             }
 
             //day must be valid
-            if (!in_array($row->fields->{'Day'}, $days)) {
+            if (!in_array(self::getValue($row, 'Day'), $days)) {
                 $errors[] = [
                     'id' => $row->id,
-                    'name' => $row->fields->{'Meeting Name'},
+                    'name' => self::getValue($row, 'Meeting Name'),
                     'issue' => 'unexpected day',
-                    'value' => $row->fields->{'Day'},
+                    'value' => self::getValue($row, 'Day'),
                 ];
                 continue;
             }
@@ -81,10 +74,11 @@ class FormatController extends Controller
             $types = [];
             $row->fields->{'TSML_Type_Final'} = explode(',', $row->fields->{'TSML_Type_Final'});
             foreach ($row->fields->{'TSML_Type_Final'} as $value) {
+                $value = trim($value);
                 if (!array_key_exists($value, $values)) {
                     $errors[] = [
                         'id' => $row->id,
-                        'name' => $row->fields->{'Meeting Name'},
+                        'name' => self::getValue($row, 'Meeting Name'),
                         'issue' => 'unexpected type',
                         'value' => $value,
                     ];
@@ -95,21 +89,21 @@ class FormatController extends Controller
 
             //hide meetings that are temporarily closed and not online
             if (in_array('TC', $types) && 
-                empty($row->fields->{'TSML_Remote_Meeting_URL'}) &&
-                empty($row->fields->{'TSML_Phone_Final'})) {
+                empty(self::getValue($row, 'TSML_Remote_Meeting_URL')) &&
+                empty(self::getValue($row, 'TSML_Phone_Final'))) {
                 continue;
             }
 
             //conference url
-            if (!empty($row->fields->{'TSML_Remote_Meeting_URL'})) {
+            if (!empty(self::getValue($row, 'TSML_Remote_Meeting_URL'))) {
 
-                $url = parse_url($row->fields->{'TSML_Remote_Meeting_URL'});
+                $url = parse_url(self::getValue($row, 'TSML_Remote_Meeting_URL'));
                 if (empty($url['host'])) {
                     $errors[] = [
                         'id' => $row->id,
-                        'name' => $row->fields->{'Meeting Name'},
+                        'name' => self::getValue($row, 'Meeting Name'),
                         'issue' => 'could not parse url',
-                        'value' => $row->fields->{'TSML_Remote_Meeting_URL'},
+                        'value' => self::getValue($row, 'TSML_Remote_Meeting_URL'),
                     ];
                 } else {
                     $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
@@ -119,7 +113,7 @@ class FormatController extends Controller
                         $new_conference_providers[] = $url['host'];
                         $errors[] = [
                             'id' => $row->id,
-                            'name' => $row->fields->{'Meeting Name'},
+                            'name' => self::getValue($row, 'Meeting Name'),
                             'issue' => 'unexpected conference provider',
                             'value' => $url['host'],
                         ];    
@@ -129,25 +123,25 @@ class FormatController extends Controller
 
             $meetings[] = [
                 'slug' => $row->id,
-                'name' => $row->fields->{'Meeting Name'},
-                'time' => date('H:i', strtotime($row->fields->{'Start Time'})),
-                'day' => array_search($row->fields->{'Day'}, $days),
+                'name' => self::getValue($row, 'Meeting Name'),
+                'time' => date('H:i', strtotime(self::getValue($row, 'Start Time'))),
+                'day' => array_search(self::getValue($row, 'Day'), $days),
                 'types' => array_unique($types),
-                'conference_url' => @$row->fields->{'TSML_Remote_Meeting_URL'},
-                'conference_url_notes' => @$row->fields->{'TSML_conference_url_notes'},
-                'conference_phone' => @$row->fields->{'TSML_Phone_Final'},
-                'conference_phone_notes' => @$row->fields->{'TSML_conference_phone_notes'},
-                'square' => @$row->fields->{'Cash App'},
-                'venmo' => @$row->fields->{'Venmo'},
-                'paypal' => @$row->fields->{'PayPal'},
-                'notes' => @$row->fields->{'Meeting Note'},
-                'location' => @$row->fields->{'TSML_Location_Name_Final'}[0],
-                'address' => @$row->fields->{'Street Address'}[0],
-                'city' => @$row->fields->{'City'}[0],
-                'postal_code' => @$row->fields->{'ZIP'}[0],
-                'region' => @$row->fields->{'TSML_Region'},
-                'sub_region' => @$row->fields->{'TSML_Sub_Region'}[0],
-                'location_notes' => @$row->fields->{'Location Note'}[0],
+                'conference_url' => self::getValue($row, 'TSML_Remote_Meeting_URL'),
+                'conference_url_notes' => self::getValue($row, 'TSML_conference_url_notes'),
+                'conference_phone' => self::getValue($row, 'TSML_Phone_Final'),
+                'conference_phone_notes' => self::getValue($row, 'TSML_conference_phone_notes'),
+                'square' => self::getValue($row, 'Cash App'),
+                'venmo' => self::getValue($row, 'Venmo'),
+                'paypal' => self::getValue($row, 'PayPal'),
+                'notes' => self::getValue($row, 'Meeting Note'),
+                'location' => self::getValue($row, 'TSML_Location_Name_Final'),
+                'address' => self::getValue($row, 'Street Address'),
+                'city' => self::getValue($row, 'City'),
+                'postal_code' => self::getValue($row, 'ZIP'),
+                'region' => self::getValue($row, 'TSML_Region'),
+                'sub_region' => self::getValue($row, 'TSML_Sub_Region'),
+                'location_notes' => self::getValue($row, 'Location Note'),
                 'timezone' => 'America/Los_Angeles',
             ];
         }
@@ -164,5 +158,12 @@ class FormatController extends Controller
         */
 
         return $return_errors ? $errors : $meetings;
+    }
+
+    //airtable values can sometimes be an array
+    static function getValue($row, $key) {
+        if (empty($row->fields->{$key})) return null;
+        if (is_array($row->fields->{$key})) return trim($row->fields->{$key}[0]);
+        return trim($row->fields->{$key});
     }
 }
