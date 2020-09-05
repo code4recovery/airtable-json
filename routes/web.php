@@ -16,6 +16,13 @@ use App\Console\Commands\Refresh;
 
 Route::get('/', function() {
 
+    return response(Storage::disk('public')->get('feed.json'))
+        ->header('Content-Type', 'application/json');
+
+});
+
+Route::get('refresh', function() {
+
     Artisan::call('refresh');
 
     return 'refreshed!';
