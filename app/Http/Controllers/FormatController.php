@@ -143,6 +143,7 @@ class FormatController extends Controller
                 'sub_region' => self::getValue($row, 'TSML_Sub_Region'),
                 'location_notes' => self::getValue($row, 'Location Note'),
                 'timezone' => 'America/Los_Angeles',
+                'feedback_url' => @$row->fields->{'Update Meeting Info'}->url,
             ];
         }
 

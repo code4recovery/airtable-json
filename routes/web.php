@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FormatController;
-use App\Http\Controllers\ImportController;
+use App\Console\Commands\Refresh;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,14 +16,9 @@ use App\Http\Controllers\ImportController;
 
 Route::get('/', function() {
 
-    //get results from airtable
-    $meetings = ImportController::table('Meetings', 'TSML Meetings');
+    Artisan::call('refresh');
 
-    //format them in the right format
-    $meetings = FormatController::convert($meetings);
-
-    //prepare data
-    return response()->json($meetings);
+    return 'refreshed!';
 });
 
 Route::get('errors', function() {
