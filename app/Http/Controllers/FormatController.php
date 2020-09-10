@@ -72,19 +72,21 @@ class FormatController extends Controller
 
             //types
             $types = [];
-            $row->fields->{'TSML_Type_Final'} = explode(',', $row->fields->{'TSML_Type_Final'});
-            foreach ($row->fields->{'TSML_Type_Final'} as $value) {
-                $value = trim($value);
-                if (!array_key_exists($value, $values)) {
-                    $errors[] = [
-                        'id' => $row->id,
-                        'name' => self::getValue($row, 'Meeting Name'),
-                        'issue' => 'unexpected type',
-                        'value' => $value,
-                    ];
-                    continue;
-                }
-                $types[] = $values[$value];
+            if (!empty($row->fields->{'TSML_Type_Final'})) {
+                $row->fields->{'TSML_Type_Final'} = explode(',', $row->fields->{'TSML_Type_Final'});
+                foreach ($row->fields->{'TSML_Type_Final'} as $value) {
+                    $value = trim($value);
+                    if (!array_key_exists($value, $values)) {
+                        $errors[] = [
+                            'id' => $row->id,
+                            'name' => self::getValue($row, 'Meeting Name'),
+                            'issue' => 'unexpected type',
+                            'value' => $value,
+                        ];
+                        continue;
+                    }
+                    $types[] = $values[$value];
+                }    
             }
 
             //hide meetings that are temporarily closed and not online
