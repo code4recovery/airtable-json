@@ -10,9 +10,9 @@ class FormatController extends Controller
     static function convert($rows, $return_errors=false) {
         $meetings = $errors = $new_conference_providers = [];
 
-        $required_fields = ['Meeting Name', 'Day', 'Start Time'];
+        $required_fields = ['TSML_name', 'TSML_day', 'TSML_time'];
 
-        $location_fields = ['Street Address', 'City', 'ZIP'];
+        $location_fields = ['TSML_address', 'TSML_city', 'TSML_postal_code'];
 
         $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -53,33 +53,33 @@ class FormatController extends Controller
             if (!$location) {
                 $errors[] = [
                     'id' => $row->id,
-                    'name' => self::getValue($row, 'Meeting Name'),
+                    'name' => self::getValue($row, 'TSML_name'),
                     'issue' => 'no location information',
                 ];
                 continue;
             }
 
             //day must be valid
-            if (!in_array(self::getValue($row, 'Day'), $days)) {
+            if (!in_array(self::getValue($row, 'TSML_day'), $days)) {
                 $errors[] = [
                     'id' => $row->id,
-                    'name' => self::getValue($row, 'Meeting Name'),
+                    'name' => self::getValue($row, 'TSML_name'),
                     'issue' => 'unexpected day',
-                    'value' => self::getValue($row, 'Day'),
+                    'value' => self::getValue($row, 'TSML_day'),
                 ];
                 continue;
             }
 
             //types
             $types = [];
-            if (!empty($row->fields->{'TSML_Type_Final'})) {
-                $row->fields->{'TSML_Type_Final'} = explode(',', $row->fields->{'TSML_Type_Final'});
-                foreach ($row->fields->{'TSML_Type_Final'} as $value) {
+            if (!empty($row->fields->{'TSML_types'})) {
+                $row->fields->{'TSML_types'} = explode(',', $row->fields->{'TSML_types'});
+                foreach ($row->fields->{'TSML_types'} as $value) {
                     $value = trim($value);
                     if (!array_key_exists($value, $values)) {
                         $errors[] = [
                             'id' => $row->id,
-                            'name' => self::getValue($row, 'Meeting Name'),
+                            'name' => self::getValue($row, 'TSML_name'),
                             'issue' => 'unexpected type',
                             'value' => $value,
                         ];
@@ -91,21 +91,21 @@ class FormatController extends Controller
 
             //hide meetings that are temporarily closed and not online
             if (in_array('TC', $types) && 
-                empty(self::getValue($row, 'TSML_Remote_Meeting_URL')) &&
-                empty(self::getValue($row, 'TSML_Phone_Final'))) {
+                empty(self::getValue($row, 'TSML_conference_url')) &&
+                empty(self::getValue($row, 'TSML_conference_phone'))) {
                 continue;
             }
 
             //conference url
-            if (!empty(self::getValue($row, 'TSML_Remote_Meeting_URL'))) {
+            if (!empty(self::getValue($row, 'TSML_conference_url'))) {
 
-                $url = parse_url(self::getValue($row, 'TSML_Remote_Meeting_URL'));
+                $url = parse_url(self::getValue($row, 'TSML_conference_url'));
                 if (empty($url['host'])) {
                     $errors[] = [
                         'id' => $row->id,
-                        'name' => self::getValue($row, 'Meeting Name'),
+                        'name' => self::getValue($row, 'TSML_name'),
                         'issue' => 'could not parse url',
-                        'value' => self::getValue($row, 'TSML_Remote_Meeting_URL'),
+                        'value' => self::getValue($row, 'TSML_conference_url'),
                     ];
                 } else {
                     $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
@@ -115,7 +115,7 @@ class FormatController extends Controller
                         $new_conference_providers[] = $url['host'];
                         $errors[] = [
                             'id' => $row->id,
-                            'name' => self::getValue($row, 'Meeting Name'),
+                            'name' => self::getValue($row, 'TSML_name'),
                             'issue' => 'unexpected conference provider',
                             'value' => $url['host'],
                         ];    
@@ -125,40 +125,32 @@ class FormatController extends Controller
 
             $meetings[] = [
                 'slug' => $row->id,
-                'name' => self::getValue($row, 'Meeting Name'),
-                'time' => date('H:i', strtotime(self::getValue($row, 'Start Time'))),
-                'day' => array_search(self::getValue($row, 'Day'), $days),
+                'name' => self::getValue($row, 'TSML_name'),
+                'time' => date('H:i', strtotime(self::getValue($row, 'TSML_time'))),
+                'day' => array_search(self::getValue($row, 'TSML_day'), $days),
                 'types' => array_unique($types),
-                'conference_url' => self::getValue($row, 'TSML_Remote_Meeting_URL'),
+                'conference_url' => self::getValue($row, 'TSML_conference_url'),
                 'conference_url_notes' => self::getValue($row, 'TSML_conference_url_notes'),
-                'conference_phone' => self::getValue($row, 'TSML_Phone_Final'),
+                'conference_phone' => self::getValue($row, 'TSML_phone'),
                 'conference_phone_notes' => self::getValue($row, 'TSML_conference_phone_notes'),
-                'square' => self::getValue($row, 'Cash App'),
-                'venmo' => self::getValue($row, 'Venmo'),
-                'paypal' => self::getValue($row, 'PayPal'),
-                'notes' => self::getValue($row, 'Meeting Note'),
-                'location' => self::getValue($row, 'TSML_Location_Name_Final'),
-                'address' => self::getValue($row, 'Street Address'),
-                'city' => self::getValue($row, 'City'),
-                'postal_code' => self::getValue($row, 'ZIP'),
-                'region' => self::getValue($row, 'TSML_Region'),
-                'sub_region' => self::getValue($row, 'TSML_Sub_Region'),
-                'location_notes' => self::getValue($row, 'Location Note'),
-                'timezone' => 'America/Los_Angeles',
-                'feedback_url' => @$row->fields->{'Update Meeting Info'}->url,
+                'square' => self::getValue($row, 'TSML_square'),
+                'venmo' => self::getValue($row, 'TSML_venmo'),
+                'paypal' => self::getValue($row, 'TSML_paypal'),
+                'notes' => self::getValue($row, 'TSML_notes'),
+                'location' => self::getValue($row, 'TSML_location'),
+                'address' => self::getValue($row, 'TSML_address'),
+                'city' => self::getValue($row, 'TSML_city'),
+                'state' => self::getValue($row, 'TSML_state'),
+                'postal_code' => self::getValue($row, 'TSML_postal_code'),
+                'region' => self::getValue($row, 'TSML_region'),
+                'sub_region' => self::getValue($row, 'TSML_sub_region'),
+                'location_notes' => self::getValue($row, 'TSML_location_notes'),
+                'timezone' => self::getValue($row, 'TSML_location_notes'),
+                'feedback_url' => self::getValue($row, 'TSML_feedback_url'),
+                'latitude' => self::getValue($row, 'TSML_latitude'),
+                'longitude' => self::getValue($row, 'TSML_longitude'),
             ];
         }
-
-        /*
-        $new_conference_providers = array_map('strtolower', array_map(function($domain) {
-            if (substr($domain, 0, 4) == 'www.') {
-                $domain = substr($domain, 4);
-            }
-            return $domain;
-        }, $new_conference_providers));
-        sort($new_conference_providers);
-        dd(array_unique($new_conference_providers));
-        */
 
         return $return_errors ? $errors : $meetings;
     }
