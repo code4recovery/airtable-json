@@ -142,10 +142,11 @@ class FormatController extends Controller
                 'city' => self::getValue($row, 'TSML_city'),
                 'state' => self::getValue($row, 'TSML_state'),
                 'postal_code' => self::getValue($row, 'TSML_postal_code'),
+                'country' => self::getValue($row, 'TSML_country', 'USA'),
                 'region' => self::getValue($row, 'TSML_region'),
                 'sub_region' => self::getValue($row, 'TSML_sub_region'),
                 'location_notes' => self::getValue($row, 'TSML_location_notes'),
-                'timezone' => self::getValue($row, 'TSML_location_notes'),
+                'timezone' => self::getValue($row, 'TSML_timezone'),
                 'feedback_url' => self::getValue($row, 'TSML_feedback_url'),
                 'latitude' => self::getValue($row, 'TSML_latitude'),
                 'longitude' => self::getValue($row, 'TSML_longitude'),
@@ -156,8 +157,8 @@ class FormatController extends Controller
     }
 
     //airtable values can sometimes be an array
-    static function getValue($row, $key) {
-        if (empty($row->fields->{$key})) return null;
+    static function getValue($row, $key, $default=null) {
+        if (empty($row->fields->{$key})) return $default;
         if (is_array($row->fields->{$key})) return trim($row->fields->{$key}[0]);
         return trim($row->fields->{$key});
     }
