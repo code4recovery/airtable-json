@@ -13,7 +13,7 @@
         <ol>
         @foreach ($errors as $error)
             <li>
-                <a href="https://airtable.com/tblZxISFYVgvtHmd9/viwVDmtNXnNvrtATs/{{ $error['id'] }}" target="_blank">
+                <a href="https://airtable.com/{{ env('AIRTABLE_TABLE') }}/{{ env('AIRTABLE_VIEW') }}/{{ $error['id'] }}" target="_blank">
                     {{ $error['name'] ?? 'No meeting name' }}</a>
 
                 {{ $error['issue'] }}
