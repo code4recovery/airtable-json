@@ -131,7 +131,7 @@ class FormatController extends Controller
                 'types' => array_unique($types),
                 'conference_url' => self::getValue($row, 'conference_url'),
                 'conference_url_notes' => self::getValue($row, 'conference_url_notes'),
-                'conference_phone' => self::getValue($row, 'phone'),
+                'conference_phone' => self::getValue($row, 'conference_phone'),
                 'conference_phone_notes' => self::getValue($row, 'conference_phone_notes'),
                 'square' => self::getValue($row, 'square'),
                 'venmo' => self::getValue($row, 'venmo'),
