@@ -44,7 +44,7 @@ class Refresh extends Command
     {
 
         //get results from airtable
-        $meetings = ImportController::table('Meetings', 'TSML Meetings');
+        $meetings = ImportController::table('SYNC_tsml', 'TSML_fields');
     
         //format them in the right format
         $meetings = FormatController::convert($meetings);

@@ -33,7 +33,7 @@ Route::get('refresh', function() {
 Route::get('errors', function() {
 
     //get results from airtable
-    $meetings = ImportController::table('Meetings', 'TSML Meetings');
+    $meetings = ImportController::table('SYNC_tsml', 'TSML_fields');
 
     //format them in the right format
     $errors = FormatController::convert($meetings, true);
