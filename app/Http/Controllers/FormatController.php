@@ -124,7 +124,7 @@ class FormatController extends Controller
             }
 
             $meetings[] = [
-                'slug' => $row->id,
+                'slug' => self::getValue($row, 'slug'),
                 'name' => self::getValue($row, 'name'),
                 'time' => date('H:i', strtotime(self::getValue($row, 'time'))),
                 'day' => array_search(self::getValue($row, 'day'), $days),
