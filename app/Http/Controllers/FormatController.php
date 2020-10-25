@@ -150,6 +150,7 @@ class FormatController extends Controller
                 'feedback_url' => self::getValue($row, 'feedback_url'),
                 'latitude' => self::getValue($row, 'latitude'),
                 'longitude' => self::getValue($row, 'longitude'),
+                'url' => 'https://aasfmarin.org/meetings?meeting=' . self::getValue($row, 'slug'),
             ];
         }
 
