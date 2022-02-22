@@ -21,9 +21,9 @@ class Controller extends BaseController
         'skype.com' => 'Skype',
         'webex.com' => 'WebEx',
         'zoho.com' => 'Zoho',
-        'zoom.us' => 'Zoom',    
+        'zoom.us' => 'Zoom',
     ];
-    
+
     static $tsml_types = [
         '11th Step Meditation' => '11',
         '12 Steps & 12 Traditions' => '12x12',
@@ -50,7 +50,7 @@ class Controller extends BaseController
         'Grapevine' => 'GR',
         'Indigenous' => 'NDG',
         'Italian' => 'ITA',
-        'Japanese' => 'JA',	
+        'Japanese' => 'JA',
         'Korean' => 'KOR',
         'Lesbian' => 'L',
         'Literature' => 'LIT',
@@ -82,6 +82,6 @@ class Controller extends BaseController
         'Wheelchair Access' => 'X',
         'Wheelchair-Accessible Bathroom' => 'XB',
         'Women' => 'W',
-        'Young People' => 'Y',  
+        'Young People' => 'Y',
     ];
 }
