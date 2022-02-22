@@ -8,7 +8,8 @@ class ImportController extends Controller
 {
 
     //recursive function to get records from Airtable API in batches
-    static function table($table, $view=null, $offset=null, $client=null) {
+    static function table($table, $view = null, $offset = null, $client = null)
+    {
 
         //set up a request handler
         if (!$client) $client = new Client();
@@ -28,14 +29,14 @@ class ImportController extends Controller
         return (empty($result->offset)) ?
             $result->records :
             array_merge(
-                $result->records, 
+                $result->records,
                 self::table($table, $view, $result->offset, $client)
             );
-
     }
 
     //set up url
-    private static function airtableUrl($table, $view=null, $offset=null) {
+    private static function airtableUrl($table, $view = null, $offset = null)
+    {
 
         $url = 'https://api.airtable.com/v0/' . env('AIRTABLE_BASE') . '/' . $table;
 

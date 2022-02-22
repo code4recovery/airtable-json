@@ -1,13 +1,11 @@
 <?php
 
 namespace App\Console\Commands;
-namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\FormatController;
 use App\Http\Controllers\ImportController;
-
 
 class Refresh extends Command
 {
@@ -38,19 +36,18 @@ class Refresh extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
     public function handle()
     {
-
         //get results from airtable
         $meetings = ImportController::table('SYNC_tsml', 'TSML_fields');
-    
+
         //format them in the right format
         $meetings = FormatController::convert($meetings);
-    
+
         //prepare data
-        Storage::disk('public')->put('feed.json', response()->json($meetings)->getContent());        
+        Storage::disk('public')->put('feed.json', response()->json($meetings)->getContent());
 
         $this->info('done!');
     }

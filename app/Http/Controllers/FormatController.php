@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 class FormatController extends Controller
 {
     //convert airtable format to meeting guide format
-    static function convert($rows, $return_errors=false) {
+    static function convert($rows, $return_errors = false)
+    {
         $meetings = $errors = $new_conference_providers = [];
 
         $required_fields = ['name', 'day', 'time'];
@@ -41,7 +42,7 @@ class FormatController extends Controller
                         'name' => self::getValue($row, 'Meeting Name'),
                         'issue' => 'empty ' . $field . ' field',
                     ];
-                    continue 2;    
+                    continue 2;
                 }
             }
 
@@ -86,13 +87,15 @@ class FormatController extends Controller
                         continue;
                     }
                     $types[] = $values[$value];
-                }    
+                }
             }
 
             //hide meetings that are temporarily closed and not online
-            if (in_array('TC', $types) && 
+            if (
+                in_array('TC', $types) &&
                 empty(self::getValue($row, 'conference_url')) &&
-                empty(self::getValue($row, 'conference_phone'))) {
+                empty(self::getValue($row, 'conference_phone'))
+            ) {
                 continue;
             }
 
@@ -108,7 +111,7 @@ class FormatController extends Controller
                         'value' => self::getValue($row, 'conference_url'),
                     ];
                 } else {
-                    $matches = array_filter(array_keys(self::$tsml_conference_providers), function($domain) use($url) {
+                    $matches = array_filter(array_keys(self::$tsml_conference_providers), function ($domain) use ($url) {
                         return stripos($url['host'], $domain) !== false;
                     });
                     if (!count($matches)) {
@@ -118,12 +121,12 @@ class FormatController extends Controller
                             'name' => self::getValue($row, 'name'),
                             'issue' => 'unexpected conference provider',
                             'value' => $url['host'],
-                        ];    
+                        ];
                     }
                 }
             }
 
-            $meetings[] = [
+            $meetings[] = array_filter([
                 'slug' => self::getValue($row, 'slug'),
                 'name' => self::getValue($row, 'name'),
                 'time' => date('H:i', strtotime(self::getValue($row, 'time'))),
@@ -151,14 +154,17 @@ class FormatController extends Controller
                 'latitude' => self::getValue($row, 'latitude'),
                 'longitude' => self::getValue($row, 'longitude'),
                 'url' => 'https://aasfmarin.org/meetings?meeting=' . self::getValue($row, 'slug'),
-            ];
+            ], function ($value) {
+                return $value !== null;
+            });
         }
 
         return $return_errors ? $errors : $meetings;
     }
 
     //airtable values can sometimes be an array
-    static function getValue($row, $key, $default=null) {
+    static function getValue($row, $key, $default = null)
+    {
         if (empty($row->fields->{$key})) return $default;
         if (is_array($row->fields->{$key})) return trim($row->fields->{$key}[0]);
         return trim($row->fields->{$key});

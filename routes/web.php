@@ -1,7 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
-use App\Console\Commands\Refresh;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\FormatController;
 
@@ -16,21 +17,19 @@ use App\Http\Controllers\FormatController;
 |
 */
 
-Route::get('/', function() {
-
+Route::get('/', function () {
     return response(Storage::disk('public')->get('feed.json'))
         ->header('Content-Type', 'application/json');
-
 });
 
-Route::get('refresh', function() {
+Route::get('refresh', function () {
 
     Artisan::call('refresh');
 
     return 'refreshed!';
 });
 
-Route::get('errors', function() {
+Route::get('errors', function () {
 
     //get results from airtable
     $meetings = ImportController::table('SYNC_tsml', 'TSML_fields');
