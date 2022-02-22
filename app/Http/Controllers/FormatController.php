@@ -126,7 +126,7 @@ class FormatController extends Controller
                 }
             }
 
-            $meetings[] = [
+            $meetings[] = array_filter([
                 'slug' => self::getValue($row, 'slug'),
                 'name' => self::getValue($row, 'name'),
                 'time' => date('H:i', strtotime(self::getValue($row, 'time'))),
@@ -154,7 +154,9 @@ class FormatController extends Controller
                 'latitude' => self::getValue($row, 'latitude'),
                 'longitude' => self::getValue($row, 'longitude'),
                 'url' => 'https://aasfmarin.org/meetings?meeting=' . self::getValue($row, 'slug'),
-            ];
+            ], function ($value) {
+                return $value !== null;
+            });
         }
 
         return $return_errors ? $errors : $meetings;
