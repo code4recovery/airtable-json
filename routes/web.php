@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\FormatController;
 
@@ -17,7 +18,8 @@ use App\Http\Controllers\FormatController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response(Storage::disk('public')->get('feed.json'))
+        ->header('Content-Type', 'application/json');
 });
 
 Route::get('refresh', function () {
